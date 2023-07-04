@@ -5,11 +5,13 @@ import com.Rst_harohiro.entities.Employee;
 import com.Rst_harohiro.service.EmpService;
 import com.Rst_harohiro.service.impl.EmpServiceImpl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,6 +98,28 @@ public class EmpController {
 
     /**
      * 员工分页功能
-     *
+     * 页面发送ajax请求，将分页查询参数(page.pageSize、name)提交到服务端
+     * 服务端Controller接收页面提交的数据并调用Service查询数据
+     * Service调用Mapper操作数据库，查询分页数据
+     * Controller将查询到的分页数据响应给页面
+     * 页面接收到分页数据并通过ElementUI的Table组件展示到页面上
      */
+    @GetMapping("/page")
+    R<Page> page(int page, int pageSize, String name) {
+       log.info("page={},pageSize={},name={}",page,pageSize,name);
+       //构造分页构造器
+        Page pageInfo = new Page(page,pageSize);
+        //构造条件构造器
+        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
+        //添加过滤条件
+        queryWrapper.like(!StringUtils.isEmpty(name),Employee::getName,name);
+        //添加排序条件
+        queryWrapper.orderByDesc(Employee::getUpdateTime);
+        empService.page(pageInfo,queryWrapper);
+
+        //执行查询条件
+        return R.success(pageInfo);
+
+    }
+
 }
