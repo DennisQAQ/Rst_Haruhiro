@@ -2,14 +2,11 @@ package com.Rst_harohiro.controller;
 
 import com.Rst_harohiro.common.R;
 import com.Rst_harohiro.entities.Employee;
-import com.Rst_harohiro.service.EmpService;
 import com.Rst_harohiro.service.impl.EmpServiceImpl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -120,6 +117,50 @@ public class EmpController {
         //执行查询条件
         return R.success(pageInfo);
 
+    }
+
+    /**
+     * 修改员工账号状态
+     * 1、页面发送ajax请求，将参数(id、 status)提交到服务端
+     * <p>
+     * 2、服务端Controller接收页面提交的数据并调用Service更新数据
+     * <p>
+     * 3、Service调用Mapper操作数据库
+     */
+    @PutMapping
+    R<String> UpdateStatus (HttpServletRequest request, @RequestBody Employee employee) {
+        log.info(employee.toString());
+        //获取当前登录的员工ID
+        Long empID = (Long) request.getSession().getAttribute("employee");
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(empID);
+        empService.updateById(employee);
+        return R.success("员工状态修改成功！");
+    }
+
+    /**
+     * 编辑员工信息
+     * 1、点击编辑按钮时，页面跳转到add.html，并在url中携带参数[员工id]
+     * <p>
+     * 2、在add.html页面获取url中的参数[员工id]
+     * <p>
+     * 3、发送ajax请求，请求服务端，同时提交员工id参数
+     * <p>
+     * 4、服务端接收请求，根据员工id查询员工信息，将员工信息以json形式响应给页面
+     * *****************************************************
+     * 注意:add.html页面为公共页面，新增员工和编辑员工都是在此页面操作，
+     * 所以该代码部分与之前添加员工代码对应，不需要重写。
+     * *****************************************************
+     */
+
+    @GetMapping("/{id}")
+    R<Employee> GetById(@PathVariable String id){
+        log.info("根据id{}查询对象",id);
+        Employee employee = empService.getById(id);
+        if (employee!=null){
+            return R.success(employee);
+        }
+        return R.error("没有查询到员工信息");
     }
 
 }
