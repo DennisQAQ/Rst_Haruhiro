@@ -22,3 +22,6 @@ mybatis-plus:
     db-config:
       id-type: ASSIGN_ID
 
+#文件上传目录
+haruhiro:
+  path: D:\Users\wy061\Pictures\Rst\

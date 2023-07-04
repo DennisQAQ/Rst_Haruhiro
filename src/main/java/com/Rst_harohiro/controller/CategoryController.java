@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/category")
@@ -90,6 +92,27 @@ public class CategoryController {
         log.info("修改商品分类{}",category.toString());
         categoryService.updateById(category);
         return R.success("修改分类成功！");
+    }
+
+    /**
+     * 菜品分类下拉框
+     * 1、页面(backend/page/food/add.html)发送ajax请求，请求服务端获取菜品分类数据并展示到下拉框中
+     * 2、页面发送请求进行图片上传，请求服务端将图片保存到服务器
+     * 3、页面发送请求进行图片下载，将上传的图片进行回显
+     * 4、点击保存按钮，发送ajax请求，将菜品相关数据以json形式提交到服务端
+     * 开发新增菜品功能，其实就是在服务端编写代码去处理前端页面发送的这4次请求即可。
+     */
+
+    @GetMapping("/list")
+    R<List<Category>> list(Category category){
+        //条件构造器
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        //添加条件
+        queryWrapper.eq(category.getType()!=null, Category::getType,category.getType());
+        //排序条件
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        List<Category> list = categoryService.list(queryWrapper);
+        return R.success(list);
 
     }
 }
