@@ -103,9 +103,20 @@ public class DishController {
     //删除成功
     @DeleteMapping
     public R<String> delete(@RequestParam("ids") List<Long> ids){
-        log.info("接受删除菜品id",ids);
+//        log.info("接受删除菜品id",ids);
         //删除菜品，逻辑删除
         dishService.deleteByids(ids);
         return R.success("菜品删除成功");
+    }
+
+    //求服务端获取套餐分类数据并展示到下拉框中
+    @GetMapping("/list")
+    R<List<Dish>> list(Dish dish){
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Dish::getStatus,1);
+        queryWrapper.eq(dish.getCategoryId()!=null,Dish::getCategoryId,dish.getCategoryId());
+        queryWrapper.orderByAsc(Dish::getSort).orderByAsc(Dish::getUpdateTime);
+        List<Dish> dishList = dishService.list(queryWrapper);
+        return R.success(dishList);
     }
 }
